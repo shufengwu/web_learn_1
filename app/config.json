@@ -1,3 +1,10 @@
 {
-    "greetText": "Hi there and greetings from JSON!"
+    "greetText": "Hi there and greetings from JSON!",
+    "banner_text1":"国务院办公厅开通“国家政务服务投诉与建议”小程序",
+    "banner_text2":"好消息！雄安新区来了北京教师团",
+    "banner_text3":"韩正在河北调研并主持召开京津冀及周边地区冬季清洁取暖工作座谈会",
+    "banner_text4":"中央第一环境保护督察组向河北省反馈“回头看”及专项督察情况",
+    "banner_text5":"第一届河北国际工业设计周在雄安新区启幕",
+    "news_banner_step":554,
+    "colomn_banner_step":292
 }

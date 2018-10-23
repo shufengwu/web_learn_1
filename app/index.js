@@ -3,72 +3,181 @@ import "./index.css";
 import "./jquery.js";
 let config = require('./config.json');
 var html = require('html-withimg-loader!./index.tmpl.html');
-// let content = document.getElementById('title_banner_center');
 let content = $("#title_banner_center");
 let img1 = require('./img/banner_pic1.jpg');
 let img2 = require('./img/banner_pic2.jpg');
 let img3 = require('./img/banner_pic3.jpg');
 let img4 = require('./img/banner_pic4.jpg');
 let img5 = require('./img/banner_pic5.jpg');
-let imgs = [img1,img2,img3,img4,img5];
+//banner图片
+let imgs = [img1, img2, img3, img4, img5];
+let start;
+let start_column;
+//banner图片说明文字
+let banner_text = [config.banner_text1, config.banner_text2, config.banner_text3, config.banner_text4, config.banner_text5];
 let img_status = 1;
 let banner_status = 1;
-let start;
+let banner_column_status = 3;
+
 window.onload = function () {
     console.log(config.greetText);
-    //$("#news_banner>div:first-child>ul").animate({left:'554px'});
-    setInterval(changeImg, 4000);
+    setTimeout(changeImg, 4000);
     start = setInterval(changeBannerImage, 5000);
-    console.log(imgs);
-    $("#notice").text("hahahahaha");
-    
+    start_column = setInterval(changeColumnBannerImage, 3000);
+    setBannerDot();
+    setBannerDotClickEvent();
+    setColumnArrowClickEvent();
+    if (document.addEventListener) {
+        //监听窗口是否可见
+        document.addEventListener('webkitvisibilitychange', function () {
+            console.log(document.webkitVisibilityState);
+            
+            if (document.webkitVisibilityState == "visible") {
+                start = setInterval(changeBannerImage, 5000);
+                start_column = setInterval(changeColumnBannerImage, 3000);
+            } else {
+                clearInterval(start);
+                clearInterval(start_column);
+            }
+        });
+    }
 }
 
-$("#news_banner>div:first-child").mouseover(function () { 
-    clearInterval(start);
-});
-
-$("#news_banner>div:first-child").mouseout(function () { 
-    start = setInterval(changeBannerImage, 5000);
-});
-
+//更改title栏的风景图图片
 function changeImg() {
-    console.log("--------------------------------------");
-    $("#title_banner_center img:first-child").attr("src",imgs[img_status]);
-    $("#title_banner_center img:last-child").attr("src", imgs[(img_status+1)%5]);
 
-    console.log(img_status);
-    console.log((img_status+1)%5);
-    img_status++;
-    if (img_status == 5) {
-        img_status = 0;
+    //淡出切换图片
+    $("#title_banner_center img:last-child").fadeOut(1000, function () {
+        console.log(img_status);
+        $("#title_banner_center img:last-child").attr("src", imgs[img_status]);
+        $("#title_banner_center img:last-child").fadeIn(0);
+        $("#title_banner_center img:first-child").attr("src", imgs[(img_status + 1) % imgs.length]);
+        img_status++;
+        if (img_status === imgs.length) {
+            img_status = 0;
+        }
+        setTimeout(changeImg, 4000);
+    });
+
+}
+
+/**
+ * 更改news轮播图的image
+ */
+function changeBannerImage() {
+    //下个显示位置
+    let position = (-config.news_banner_step * (banner_status + 1)) + 'px';
+    //平移到下个位置
+    $("#news_banner>div:first-child>ul:first-child").animate({
+        left: position
+    }, 500);
+    banner_status++;
+    if (banner_status === 5) {
+        //如果切换到第1张图前面的那张图
+        $("#news_banner>div:first-child>ul:first-child").animate({
+            left: '0px'
+        }, 0);
+        banner_status = 0;
+    }
+    //设置news轮播图的点的状态
+    setBannerDot();
+    //设置news轮播图底部文字
+    setBannerText((banner_status + 4) % 5);
+}
+
+/**
+ * 更改专栏轮播图图片
+ */
+function changeColumnBannerImage() {
+    let position = (-config.colomn_banner_step * (banner_column_status + 1)) + 'px';
+    $("#column_marquee>ul").animate({
+        left: position
+    }, 500);
+    banner_column_status++;
+    if (banner_column_status === 8) {
+        $("#column_marquee>ul").animate({
+            left: '-876px'
+        }, 0);
+        banner_column_status = 3;
     }
 }
 
-function changeBannerImage(){
-    
-    
-    // if(banner_status==0){
-    //     $("#news_banner>div:first-child>ul").animate({left:(-554*(banner_status+1))+'px'});
-    // }else if(banner_status==1){
-    //     $("#news_banner>div:first-child>ul").animate({left:'-1108px'});
-    // }else if(banner_status==2){
-    //     $("#news_banner>div:first-child>ul").animate({left:'-1662px'});
-    // }else if(banner_status==3){
-    //     $("#news_banner>div:first-child>ul").animate({left:'-2216px'});
-    // }else if(banner_status==4){
-    //     $("#news_banner>div:first-child>ul").animate({left:'-2770px'});
-        
-    // }
-    let position = (-554*(banner_status+1))+'px';
-    $("#news_banner>div:first-child>ul").animate({left:position},500);
-    banner_status++;
-    if(banner_status==5){
-        $("#news_banner>div:first-child>ul").animate({left:'0px'},0);
-        // $("#news_banner>div:first-child>ul").attr({
-        //     style : "position: absolute;height: 290px;width: 3878px;left: 0px;"
-        // });
-        //$("#news_banner>div:first-child>ul").offset({left:'0px'});
-        banner_status=0;
+/**
+ * 更改专栏轮播图图片(反向)
+ */
+
+function changeColumnBannerImageReverse() {
+    let position = (-config.colomn_banner_step * (banner_column_status - 1)) + 'px';
+    $("#column_marquee>ul").animate({
+        left: position
+    }, 500);
+    banner_column_status--;
+    if (banner_column_status === 0) {
+        $("#column_marquee>ul").animate({
+            left: '-1460px'
+        }, 0);
+        banner_column_status = 5;
     }
+}
+
+/**
+ * 设置news轮播图的点的状态
+ */
+function setBannerDot() {
+    $("#news_banner>div:first-child>ul:last-child>li").each(function (index, element) {
+        //选中状态
+        if ((index + 1) % 5 === banner_status) {
+            $(element).css("color", "#000000");
+            $(element).css("border-color", "rgb(255,0,0)");
+            $(element).css("background-color", "rgb(204,0,0)");
+            //未选中状态
+        } else {
+            $(element).css("color", "rgb(204,204,204)");
+            $(element).css("border-color", "rgb(153,153,153)");
+            $(element).css("background-color", "rgb(102,102,102)");
+        }
+    });
+}
+
+/**
+ * 设置news轮播图的点的点击事件
+ */
+function setBannerDotClickEvent() {
+
+    $("#news_banner>div:first-child>ul:last-child").on("click", "li", function () {
+        clearInterval(start);
+        banner_status = $(this).index();
+        changeBannerImage();
+        start = setInterval(changeBannerImage, 5000);
+    });
+}
+
+/**
+ * 设置专栏轮播图的箭头的点击事件
+ */
+function setColumnArrowClickEvent() {
+
+    $("#column_left_arrow").click(function (e) {
+        e.preventDefault();
+        clearInterval(start_column);
+        changeColumnBannerImageReverse();
+        start_column = setInterval(changeColumnBannerImage, 3000);
+
+    });
+
+    $("#column_right_arrow").click(function (e) {
+        e.preventDefault();
+        clearInterval(start_column);
+        changeColumnBannerImage();
+        start_column = setInterval(changeColumnBannerImage, 3000);
+
+    });
+}
+
+/**
+ * 设置news轮播图底部文字
+ * @param {*} index 
+ */
+function setBannerText(index) {
+    $("#news_banner>div:last-child").text(banner_text[index]);
 }
